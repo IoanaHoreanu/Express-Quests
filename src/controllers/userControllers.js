@@ -1,19 +1,26 @@
-const { database, users } = require("../../database");
+const database = require("../../database");
 
 const getUsers = (req, res) => {
-  res.status(200).json(users);
+  database
+    .query("select * from users")
+    .then(([users]) => {
+      res.json(users); 
+    })
+    .catch((err) => {
+      console.error(err);
+      res.sendStatus(500);
+    });
 };
 
-const getUserById = (req, res) => {
-  const userId = parseInt(req.params.id);
-
+const getUsersById = (req, res) => {
+  const id = parseInt(req.params.id);
   database
-    .query("SELECT * FROM users WHERE id = ?", [userId])
-    .then(([usersFromDb]) => {
-      if (usersFromDb.length > 0) {
-        res.status(200).json(usersFromDb[0]);
+    .query("select * from users where id = ?", [id])
+    .then(([users]) => {
+      if (users[0] != null) {
+        res.json(users[0]);
       } else {
-        res.status(404).json({ error: 'Utilisateur non trouvé' });
+        res.status(404).send("Not Found");
       }
     })
     .catch((err) => {
@@ -23,6 +30,6 @@ const getUserById = (req, res) => {
 };
 
 module.exports = {
+  getUsersById,
   getUsers,
-  getUserById,
 };
