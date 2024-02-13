@@ -5,6 +5,38 @@ const crypto = require("node:crypto");
 
 afterAll(() => database.end());
 
+describe("DELETE /api/users/:id", () => {
+  it("should delete an existing user (status code 204)", async () => {
+    const newUser = {
+      firstname: "Ioana",
+      lastname: "Horeanu",
+      email: `${crypto.randomUUID()}@wild.co`,
+      city: "poitiers",
+      language: "french",
+    };
+
+    const [result] = await database.query(
+      "INSERT INTO users(firstname, lastname, email, city, language) VALUES (?, ?, ?, ?, ?)",
+      [newUser.firstname, newUser.lastname, newUser.email, newUser.city, newUser.language]
+    );
+
+    const id = result.insertId;
+
+    const response = await request(app).delete(`/api/users/${id}`);
+
+    expect(response.status).toEqual(204);
+
+    const [users] = await database.query("SELECT * FROM users WHERE id=?", id);
+    expect(users.length).toEqual(0);
+  });
+
+  it("should return a 404 error for a non-existing user", async () => {
+    const response = await request(app).delete("/api/users/86");
+
+    expect(response.status).toEqual(404);
+  });
+});
+
 describe("PUT /api/users/:id", () => {
   it("should edit user", async () => {
     const newUser = {

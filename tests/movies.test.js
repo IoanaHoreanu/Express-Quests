@@ -6,6 +6,38 @@ const database = require("../database");
 
 afterAll(() => database.end());
 
+describe("DELETE /api/movies/:id", () => {
+  it("should delete an existing movie (status code 204)", async () => {
+    const newMovie = {
+      title: "Avatar",
+      director: "James Cameron",
+      year: "2009",
+      color: "1",
+      duration: 162,
+    };
+
+    const [result] = await database.query(
+      "INSERT INTO movies(title, director, year, color, duration) VALUES (?, ?, ?, ?, ?)",
+      [newMovie.title, newMovie.director, newMovie.year, newMovie.color, newMovie.duration]
+    );
+
+    const id = result.insertId;
+
+    const response = await request(app).delete(`/api/movies/${id}`);
+
+    expect(response.status).toEqual(204);
+
+    const [movies] = await database.query("SELECT * FROM movies WHERE id=?", id);
+    expect(movies.length).toEqual(0);
+  });
+
+  it("should return a 404 error for a non-existing movie", async () => {
+    const response = await request(app).delete("/api/movies/25"); 
+
+    expect(response.status).toEqual(404);
+  });
+});
+
 describe("PUT /api/movies/:id", () => {
   it("should edit movie", async () => {
     const newMovie = {
