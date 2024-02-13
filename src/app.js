@@ -20,5 +20,7 @@ app.get("/api/movies/:id", movieControllers.getMovieById);
 app.get("/api/users", userControllers.getUsers);
 app.get("/api/users/:id", userControllers.getUsersById);
 
+app.delete("/api/movies/:id", movieControllers.deleteMovie);
+app.delete("/api/users/:id", userControllers.deleteUser);
 
 module.exports = app;
